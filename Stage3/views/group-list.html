@@ -1,0 +1,15 @@
+﻿<h1>My Groups</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Group</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="group in groupListCtrl.groups">
+            <td><a href="#/groups/{{group.id}}">{{group.name}}</a></td>
+            <td>{{group.phone | phoneFormatter}}</td>
+        </tr>
+    </tbody>
+</table>
