@@ -1,0 +1,323 @@
+###############################################################################
+#
+# Code snippets for Intro to Angular
+#
+###############################################################################
+
+
+
+
+
+=======
+STAGE 1
+=======
+
+
+
+E.164 phone number regex
+.replace(/\+\d(\d{3})(\d{3})(\d{4})/, '($1) $2-$3')
+
+
+
+=======
+STAGE 2
+=======
+
+
+
+Web.config for JSON data
+------------------------
+
+<system.webServer>
+  <staticContent>
+    <mimeMap fileExtension="json" mimeType="application/json"/>
+  </staticContent>
+</system.webServer>
+
+
+Controller $http
+----------------
+
+$http.get('data/groups.json').success(function (data) {
+  angular.forEach(data, function (group) {
+    this.groups.push(group);
+  }.bind(this));
+}.bind(this));
+
+
+INDEX.HTML with NavBar
+----------------------
+
+<!DOCTYPE html>
+<html ng-app="main" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Sample Angular App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="Scripts/angular.min.js"></script>
+    <script type="text/javascript" src="App/main.js"></script>
+</head>
+<body ng-controller="MainController as main">
+
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                </button>
+                <a class="navbar-brand" href="#">Primr</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">My Groups <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Account</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Log Out</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- / Navigation bar -->
+
+    <div class="container">
+        <h1>My Groups</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="group in main.groups">
+                    <td>{{group.name}}</td>
+                    <td>{{group.phone | phoneFormatter}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
+
+
+Routing config in main.js
+-------------------------
+
+app.config(['$routeProvider',
+  function ($routeProvider) {
+    $routeProvider.
+      when('/groups', {
+          templateUrl: 'App/Partials/group-list.html',
+          controller: 'MainController',
+          controllerAs: 'main'
+      }).
+      otherwise({
+          redirectTo: '/groups'
+      });
+}]);
+
+
+Add details controller
+----------------------
+
+app.controller("GroupDetailsController", function ($routeParams) {
+    this.groupId = $routeParams.groupId
+});
+
+
+Add detail route to main.js
+---------------------------
+
+when('/groups', {
+    templateUrl: 'App/Partials/group-details.html',
+    controller: 'GroupDetailsController',
+    controllerAs: 'groupDetailsCtrl'
+}).
+
+
+
+=======
+STAGE 4 - SERVICES
+=======
+
+
+
+Start blank primrServices module
+--------------------------------
+
+(function () {
+
+    var primrServices = angular.module("primrServices", []);
+
+})();
+
+Service
+-------
+primrServices.factory('groupsDataService', [ '$http', function ($http) {
+    return {
+        retrieveGroups: function () {
+            loadGroupsPromise = $http.get('data/groups.json').then(function (response) {
+                return response.data;
+            });
+            return loadGroupsPromise;
+        },
+        findGroup: function (groupId) {
+            findGroupPromise = this.retrieveGroups().then(function (groups) {
+                var found;
+                angular.forEach(groups, function (group) {
+                    if (group.id == groupId) found = group;
+                });
+                return found;
+            });
+            return findGroupPromise;
+        }
+    };
+}]);
+
+
+
+Filling Out Group Form (Tabs)
+-----------------------------
+<h1>{{group.name}} - {{group.phone | phoneFormatter}}</h1>
+
+<form>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" placeholder="Group Name" ng-model="group.name">
+    </div>
+
+    <div class="panel">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="group.open" /> Open for new members
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="call_handler">Voice Calls</label>
+            <select class="form-control" ng-model="group.call_handler">
+                <option value="reject_busy">Reject with busy signal</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Group Mode</label>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="groupModes" ng-model="group.mode" value="chat" />
+                    Chat - everyone sees all messages
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="groupModes" ng-model="group.mode" value="broadcast" />
+                    Broadcast - group announcements and queries
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="form-group">
+            <label for="welcome_message">When new member joins group</label>
+            <textarea rows="2" class="form-control" ng-model="group.welcome_message"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="goodbye_message">When member leaves group (#cancel)</label>
+            <textarea rows="2" class="form-control" ng-model="group.goodbye_message"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="info_message">When member requests group info (#info)</label>
+            <textarea rows="2" class="form-control" ng-model="group.info_message"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="response_message">When group is in broadcast mode and member texts group</label>
+            <textarea rows="2" class="form-control" ng-model="group.response_message"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="reject_message">When group is closed and a non-member tries to join</label>
+            <textarea rows="2" class="form-control" ng-model="group.reject_message"></textarea>
+        </div>
+    </div>
+</form>
+
+Tabs Snippet
+------------
+<ul class="nav nav-tabs">
+    <li><a>Behaviour</a></li>
+    <li><a>Messages</a></li>
+</ul>
+
+ng-class="{active: tab === 1}"
+
+
+
+
+UNIT TEST FOR TABS CONTROLLER
+-----------------------------
+/// <reference path="../Scripts/jasmine.js" />
+/// <reference path="../Scripts/angular.js" />
+/// <reference path="../Scripts/angular-mocks.js" />
+
+/// <reference path="../App/services.js" />
+/// <reference path="../App/controllers.js" />
+
+describe("main", function () {
+
+    beforeEach(module("primrControllers"));
+
+    describe("TabPanelController", function () {
+
+        var controller;
+
+        beforeEach(inject(function ($rootScope, $controller) {
+            controller = $controller('TabPanelController', { '$scope': $rootScope.$new() });
+        }));
+
+        it("should evaluate true to truthy", function () {
+            expect(true).toBeTruthy();
+        });
+
+    });
+
+});
+
+
+
+
+
+Controller
+----------
+groupsDataService.retrieveGroups().then(function (data) {
+    this.groups = data;
+}.bind(this));
+
+
+Boilerplate Controller Test
+
+/// <reference path="../Scripts/jasmine.js" />
+/// <reference path="../Scripts/angular.js" />
+/// <reference path="../Scripts/angular-mocks.js" />
+
+/// <reference path="../App/main.js" />
+
+describe("main", function () {
+
+    beforeEach(module("main"));
+
+    describe("MainController", function () {
+
+        var controller;
+
+        beforeEach(inject(function ($rootScope, $controller) {
+            controller = $controller('MainController');
+        }));
+
+        it("should have a list of group phone numbers", function () {
+            expect(controller.groups.length).toEqual(3);
+        });
+
+    });
+
+});
