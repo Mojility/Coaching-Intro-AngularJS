@@ -12,10 +12,57 @@
 STAGE 1
 =======
 
+--
 
+"devDependencies": {
+  "angular-mocks": "~1",
+  "karma": "^0.12.16",
+  "karma-chrome-launcher": "^0.1.4",
+  "karma-jasmine": "^0.1.5"
+}
+
+--
+
+var app = angular.module("main", []);
+
+app.filter('phoneFormatter', function () {
+    return function (input) {
+        return input;
+    };
+});
+
+--
+
+describe("main", function () {
+
+    beforeEach(module("main"));
+
+    describe("phoneFormatter", function () {
+
+        var filter;
+
+        beforeEach(inject(function ($filter) {
+            filter = $filter('phoneFormatter');
+        }));
+
+        it("should present a properly formatted phone number", function () {
+            var formattedPhone = filter('+19055551212', 'phoneFormatter');
+            expect(formattedPhone).toEqual("(905) 555-1212");
+        });
+
+    });
+
+});
+
+--
 
 E.164 phone number regex
 .replace(/\+\d(\d{3})(\d{3})(\d{4})/, '($1) $2-$3')
+
+--
+
+{{ "+14165551212" | phoneFormatter}}
+
 
 
 
@@ -23,16 +70,6 @@ E.164 phone number regex
 STAGE 2
 =======
 
-
-
-Web.config for JSON data
-------------------------
-
-<system.webServer>
-  <staticContent>
-    <mimeMap fileExtension="json" mimeType="application/json"/>
-  </staticContent>
-</system.webServer>
 
 
 Controller $http

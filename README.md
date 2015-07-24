@@ -16,3 +16,18 @@ This workshop is broken into 5 stages, with an accompanying presentation. It is 
 These are my notes I use when going through this presentation. There is a separate snippets file for code copy/paste throughout the presentation, but I like to type this stuff out where possible.
 
 ### Stage 0
+
+- starting bare, package.json to npm install AngularJS
+- create blank html with ng-app, add angular, do simple {{}} calculation to confirm working
+
+### Stage 1
+
+- add Karma to package.json
+- add main.js
+- create null filter
+- add spec
+- run karma
+- make it pass
+- show it in html
+
+### Stage 2
