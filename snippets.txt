@@ -63,6 +63,77 @@ E.164 phone number regex
 
 {{ "+14165551212" | phoneFormatter}}
 
+--
+
+var groupsList = [
+  {
+      id: 0,
+      phone: '+19055551212',
+      name: 'Oshawa',
+      secret: '905sec',
+      call_handler: 'reject_busy',
+      open: true,
+      mode: 'broadcast',
+      welcome_message: "Send #callme to set your handle, #cancel to leave any time, #info for group information.",
+      goodbye_message: "Sorry to see you go. Join again if you want by sending another text.",
+      info_message: "This is just a TEST group, nothing really to see here.",
+      response_message: "If this is an emergency, please call 911.",
+      reject_message: "Contact your team lead to be added to the group."
+  },
+  {
+      id: 1,
+      phone: '+14165551212',
+      name: 'Toronto',
+      secret: '416sec',
+      call_handler: 'reject_busy',
+      open: true,
+      mode: 'broadcast',
+      welcome_message: "Send #callme to set your handle, #cancel to leave any time, #info for group information.",
+      goodbye_message: "Sorry to see you go. Join again if you want by sending another text.",
+      info_message: "This is just a TEST group, nothing really to see here.",
+      response_message: "If this is an emergency, please call 911.",
+      reject_message: "Contact your team lead to be added to the group."
+  },
+  {
+      id: 2,
+      phone: '+17055551212',
+      name: 'Peterborough',
+      secret: '705sec',
+      call_handler: 'reject_busy',
+      open: true,
+      mode: 'broadcast',
+      welcome_message: "Send #callme to set your handle, #cancel to leave any time, #info for group information.",
+      goodbye_message: "Sorry to see you go. Join again if you want by sending another text.",
+      info_message: "This is just a TEST group, nothing really to see here.",
+      response_message: "If this is an emergency, please call 911.",
+      reject_message: "Contact your team lead to be added to the group."
+  }
+];
+
+--
+
+app.controller("MainController", function () {
+});
+
+--
+
+<body ng-controller="MainController as main">
+    <h1>Primr Groups</h1>
+    <table>
+        <thead>
+            <th>Group</th>
+            <th>Phone</th>
+        </thead>
+        <tbody>
+            <tr ng-repeat="group in main.groups">
+                <td>{{group.name}}</td>
+                <td>{{group.phone | phoneFormatter}}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+
 
 
 
@@ -76,67 +147,38 @@ Controller $http
 ----------------
 
 $http.get('data/groups.json').success(function (data) {
-  angular.forEach(data, function (group) {
-    this.groups.push(group);
-  }.bind(this));
+    angular.forEach(data, function (group) {
+        this.groups.push(group);
+    }.bind(this));
 }.bind(this));
 
+Groups Data service
+-------------------
 
-INDEX.HTML with NavBar
-----------------------
+var primrServices = angular.module("myServices", []);
 
-<!DOCTYPE html>
-<html ng-app="main" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>Sample Angular App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="Content/bootstrap.min.css" rel="stylesheet" />
-    <script type="text/javascript" src="Scripts/angular.min.js"></script>
-    <script type="text/javascript" src="App/main.js"></script>
-</head>
-<body ng-controller="MainController as main">
+primrServices.factory('groupsDataService', ['$http', function ($http) {
+    return {
+        retrieveGroups: function () {
+            loadGroupsPromise = $http.get('data/groups.json').then(function (response) {
+                return response.data;
+            });
+            return loadGroupsPromise;
+        },
+        findGroup: function (groupId) {
+            findGroupPromise = this.retrieveGroups().then(function (groups) {
+                var found;
+                angular.forEach(groups, function (group) {
+                    if (group.id == groupId) found = group;
+                });
+                return found;
+            });
+            return findGroupPromise;
+        }
+    };
+}]);
 
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-inverse navbar-static-top">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                </button>
-                <a class="navbar-brand" href="#">Primr</a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">My Groups <span class="sr-only">(current)</span></a></li>
-                    <li><a href="#">Account</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">Log Out</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- / Navigation bar -->
 
-    <div class="container">
-        <h1>My Groups</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Phone</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="group in main.groups">
-                    <td>{{group.name}}</td>
-                    <td>{{group.phone | phoneFormatter}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
 
 
 
