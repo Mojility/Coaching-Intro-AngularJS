@@ -33,6 +33,7 @@ These are my notes I use when going through this presentation. There is a separa
 - build empty controller
 - add spec
 - make it pass (add 'groups' to controller)
+- output groups in view
 
 ### Stage 2 - Bringing Structure
 
